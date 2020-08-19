@@ -28,7 +28,7 @@ class Extend(models.Model):
 
 class StudentExtend(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    section = models.CharField(max_length=60, choices=[("1","1"),("2","2"),("3","3"),("4","4"),("5","5"),("6","6"),("7","7"),("8","8"),("9","9"),("10","10"),("To be Filled","To be Filled")], default="To be Filled")
+    section = models.CharField(max_length=60, choices=[("1","1"),("2","2"),("3","3"),("4","4"),("5","5"),("6","6"),("7","7"),("8","8"),("9","9"),("10","10"),("To be Filled","To be Filled if student")], default="To be Filled if student")
 
     def __str__(self):
         return f'{self.user.username} section'

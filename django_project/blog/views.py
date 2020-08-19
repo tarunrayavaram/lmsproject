@@ -1,20 +1,24 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
+from users.models import Extend, StudentExtend
+from users.models import Profile, Extend, StudentExtend
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def home(request):
-    context = {
-            'posts': Post.objects.all()
-            }
-    return render(request, 'blog/home.html',context)
-
-class PostListView(ListView):
-    model = Post
-    template_name = 'blog/home.html' #<app>/<model>_<viewtype>.html
-    context_object_name = 'posts'
-    paginate_by = 5
+    user = get_object_or_404(User, username=request.user.username)
+    user_id = user.id
+    extend = get_object_or_404(Extend, user_id=user_id)
+    context={}
+    if extend.tag == "teacher":
+        context.update({'posts':Post.objects.filter(instructor=user)})
+    else:
+        stud_extend = get_object_or_404(StudentExtend, user_id=user_id)
+        context.update({'posts':Post.objects.filter(section=stud_extend.section)})
+    return render(request, 'blog/home.html', context)
 
 class UserPostListView(ListView):
     model = Post
@@ -24,8 +28,13 @@ class UserPostListView(ListView):
 
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
-        return Post.objects.filter(author=user)
-
+        user_id = user.id
+        extend = get_object_or_404(Extend, user_id=user_id)
+        if extend.tag == "teacher":
+            return Post.objects.filter(instructor=user)
+        else:
+            stud_extend = get_object_or_404(StudentExtend, user_id=user_id)
+            return Post.objects.filter(section=stud_extend.section)
 
 class PostDetailView(DetailView):
     model = Post
